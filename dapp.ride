@@ -2,10 +2,8 @@
 {-# CONTENT_TYPE DAPP #-}
 {-# SCRIPT_TYPE ACCOUNT #-}
 
-let adminPublicKey = base58'BqPySUvbKdRTRZ33nGTtrQRdus5qwhnQkqZ7G9iNcDto'
-
-# WCT: DHgwrRvVyqJsepd32YbBqUeDH4GJ1N984X8QoekjgH8J
-let wctId = base58'5M58Edq3qciFLWMFS9kLLKfFQoENxokdi2hdE3ju4hrq'
+let adminPublicKey = base58'5584brtd1tLqMNJdCzvPFUEL1ujYRyi4Sy3zEZ5nTPsJ'
+let wctId = base58'DHgwrRvVyqJsepd32YbBqUeDH4GJ1N984X8QoekjgH8J'
 
 let wvsPrice = 100000000
 let wctPrice = 100
@@ -14,8 +12,8 @@ let lastCell = 99
 let roundKey = "round"
 let cellsKey = "cells"
 let lastWinKey = "lastWin"
-let lastWinWctKey = "lastWin_wct"
-let lastWinWvsKey = "lastWin_wvs"
+let lastWinWctKey = "lastWinWct"
+let lastWinWvsKey = "lastWinWvs"
 
 @Callable(i)
 func buy(cell: Int) = {
@@ -102,8 +100,5 @@ func buy(cell: Int) = {
 
 @Verifier(tx)
 func verify() = {
-    # dev
-    match tx {
-        case _ => sigVerify(tx.bodyBytes, tx.proofs[0], tx.senderPublicKey)
-    }
+    false
 }
