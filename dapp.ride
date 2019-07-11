@@ -1,0 +1,109 @@
+{-# STDLIB_VERSION 3 #-}
+{-# CONTENT_TYPE DAPP #-}
+{-# SCRIPT_TYPE ACCOUNT #-}
+
+let adminPublicKey = base58'BqPySUvbKdRTRZ33nGTtrQRdus5qwhnQkqZ7G9iNcDto'
+
+# WCT: DHgwrRvVyqJsepd32YbBqUeDH4GJ1N984X8QoekjgH8J
+let wctId = base58'5M58Edq3qciFLWMFS9kLLKfFQoENxokdi2hdE3ju4hrq'
+
+let wvsPrice = 100000000
+let wctPrice = 100
+let lastCell = 99
+
+let roundKey = "round"
+let cellsKey = "cells"
+let lastWinKey = "lastWin"
+let lastWinWctKey = "lastWin_wct"
+let lastWinWvsKey = "lastWin_wvs"
+
+@Callable(i)
+func buy(cell: Int) = {
+    let round = this.getInteger(roundKey).extract()
+    let cells = this.getInteger(cellsKey).extract()
+    # check cell >= 0 and <= 99
+    if (cell < 0 || cell > lastCell) then {
+        throw("Invalid number")
+    } else {
+        # check payment
+        let pmt = i.payment.valueOrErrorMessage("Where is payment?")
+        let wvs = !pmt.assetId.isDefined()
+        let wct = pmt.assetId == wctId
+        if (!wct && !wvs || wct && pmt.amount != wctPrice || wvs && pmt.amount != wvsPrice) then {
+            throw("Price is 1 WCT or 1 WAVES")
+        } else {
+            # check if bought
+            let cellData = this.getString(cell.toString())
+            let bought = if (cellData.isDefined()) then {
+                let cellRound = cellData.extract().split("_").getElement(1)
+                if cellRound == round.toString() then {
+                    true
+                } else {
+                    false
+                }
+            } else {
+                false
+            }
+            if (bought) then {
+                throw("Already bought")
+            } else {
+                # last cell?
+                let last = cells == lastCell
+                if (last) then {
+                    let wctFlag = if wct then 1 else 0
+                    let wvsFlag = if wvs then 1 else 0
+                    let wctAmount = this.assetBalance(wctId) + pmt.amount * wctFlag
+                    let wvsAmount = this.wavesBalance() + pmt.amount * wvsFlag
+
+                    let wvsAdminShare = wvsAmount / 10
+                    let wvsWinShare = wvsAmount - wvsAdminShare
+
+                    let wctAdminShare = wctAmount / 10
+                    let wctWinShare = wctAmount - wctAdminShare
+
+                    let adminAddress = adminPublicKey.addressFromPublicKey()
+
+                    let winCell = lastBlock.generationSignature.toInt() % (lastCell + 1)
+
+                    let winData = this.getString(winCell.toString()).extract()
+                    let winAddress = if (winCell == cell) then {
+                        i.caller
+                    } else {
+                        winData.split("_").getElement(0).addressFromString().extract()
+                    }
+
+                    # Reset counters, transfer prize
+                    ScriptResult(
+                        WriteSet([
+                            DataEntry(cell.toString(), i.caller.toString() + "_" + round.toString()),
+                            DataEntry(cellsKey, 0),
+                            DataEntry(roundKey, round + 1),
+                            DataEntry(lastWinKey, winCell.toString() + "_" + winAddress.toString()),
+                            DataEntry(lastWinWvsKey, wvsAmount),
+                            DataEntry(lastWinWctKey, wctAmount)
+                        ]),
+                        TransferSet([
+                            ScriptTransfer(winAddress, wvsWinShare, unit),
+                            ScriptTransfer(adminAddress, wvsAdminShare, unit),
+                            ScriptTransfer(winAddress, wctWinShare, wctId),
+                            ScriptTransfer(adminAddress, wctAdminShare, wctId)
+                        ])
+                    )
+                } else {
+                    WriteSet([
+                        DataEntry(cell.toString(), i.caller.toString() + "_" + round.toString()),
+                        DataEntry(cellsKey, cells + 1)
+                    ])
+                }
+            }
+        }
+    }
+}
+
+@Verifier(tx)
+func verify() = {
+    # dev
+    match tx {
+        case _ => sigVerify(tx.bodyBytes, tx.proofs[0], tx.senderPublicKey)
+    }
+}

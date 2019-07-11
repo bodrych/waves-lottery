@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAA/AAAAPwBMDxhdwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAGwSURBVFiFtZc7TsNAEEDfRgpKJBruQkkHDUFAg3OEXCF0mI5cIS0doaIAJEITuE8akIsUQxEiO/HuesYLU1r2vqfd+awhJYaScyV3SWskwTMRMpEUCdcaLtxsPRMmPLrr/xfwwRMkbAIxeEsJvYAG3kJCJ2CBGyU6jQuNpItwZIIDOA4ZSTdNYCRdpm4FnANzA35Bj0umbtUkERYYSs6SOZnsM3MFcKGUWNBjwL37JpM+S55jfcKfA9tnvgDOmLkvMukDT8CJCl59N5ATdQF/wmkkwvBNeCS2BeLZHpNohgckSgFdqfkk9tRwj4QzwEMSMHOFGr4j4Vo1maoEYIZXJDpAYYSvo4e0+m47is0RjBG0M3034doeQc6ju103ogc3waEZHr5sfzU3q1841MswthOxUtM3qwq8LhCW0NR5s8QO3C9Ql9A3mZiEBx4WKCUG5ibjkxA+ffC4AJTj2F7npUQ50r3RfCMaSZclL8CxEr6Jdw44jcFBcyOauhWONyMchI8mONgupfpmFUi4NAGthAFuF2iSMMLbCYQkWsDTYijjys+pdZz/mUTOUPKUJX4ATPA0+A6927EAAAAASUVORK5CYII=" />
+	<title>Waves Community Lottery</title>
+</head>
+<body>
+	<div class="bg"></div>
+	<div class="bg bg2"></div>
+	<div class="bg bg3"></div>
+	<div id="wrapper">
+		<div id="app">
+			<div id="header">
+				<span id="title">
+					{{ $t('title') }}
+				</span><br />
+				{{ $t('shortDesc') }} <span class="select" :class="[{ selected: asset == 'waves' }]" @click="asset='waves'">WAVES</span> / <span class="select" :class="[{ selected: asset == 'wct' }]" @click="asset='wct'">WCT</span>
+			</div>
+			<div id="left" v-html="$t('description')">
+			</div>
+			<div id="container">
+				<div
+				:title="cells[index - 1].round == round ? cells[index - 1].address : 'Click to buy'"
+				class="box"
+				v-for="index in 100"
+				@click="cells[index - 1].round != round ? buy(index - 1) : null"
+				:class="[{ free: cells[index - 1].round != round }, { own: cells[index - 1].round == round && cells[index - 1].address === publicState.account.address }]">
+					<div>
+						{{ index - 1 }}
+					</div>
+				</div>
+			</div>
+			<div id="right">
+				{{ $t('language') }}: <span class="select" :class="[{ selected: $i18n.locale == 'en' }]" @click="$i18n.locale='en'">EN</span> <span class="select" :class="[{ selected: $i18n.locale == 'ru' }]" @click="$i18n.locale='ru'">RU</span><br />
+				{{ $t('round') }}: {{ round }}<br />
+				{{ $t('balance') }}: {{ wvsBalance }} WAVES + {{ wctBalance }} WCT<br />
+				{{ $t('lastWin') }}:
+				<template v-if="round === 1">{{ $t('firstRound') }}</template>
+				<template v-else>{{ lastWin.cell }}<br />{{ lastWin.address }}</template>
+				<br />
+				<span class="button" @click="checkNetwork">{{ $t('highlight') }}</span>
+			</div>
+			<div id="footer">
+				{{ $t('gameAddress') }}: {{ game }}<br />
+				<!-- {{ $t('forumThread') }}<br /> -->
+			</div>
+		</div>
+	</div>
+</body>
+</html>
