@@ -12,11 +12,14 @@
 	<div class="bg bg3"></div>
 	<div id="wrapper">
 		<div id="app">
+			<div id="status">
+				{{ status.type === 'translate' ? $t(status.text) : status.text }}
+			</div>
 			<div id="header">
 				<span id="title">
 					{{ $t('title') }}
 				</span><br />
-				{{ $t('shortDesc') }} <span class="select" :class="[{ selected: asset == 'waves' }]" @click="asset='waves'">WAVES</span> / <span class="select" :class="[{ selected: asset == 'wct' }]" @click="asset='wct'">WCT</span>
+				{{ $t('shortDesc') }}
 			</div>
 			<div id="left" v-html="$t('description')">
 			</div>
@@ -25,8 +28,8 @@
 				:title="cells[index - 1].round == round ? cells[index - 1].address : 'Click to buy'"
 				class="box"
 				v-for="index in 100"
-				@click="cells[index - 1].round != round ? buy(index - 1) : null"
-				:class="[{ free: cells[index - 1].round != round }, { own: cells[index - 1].round == round && cells[index - 1].address === publicState.account.address }]">
+				@click="cells[index - 1].round != round && !disabled ? buy(index - 1) : null"
+				:class="[{ free: cells[index - 1].round != round }, { own: cells[index - 1].round == round && cells[index - 1].address === address }]">
 					<div>
 						{{ index - 1 }}
 					</div>
@@ -34,17 +37,16 @@
 			</div>
 			<div id="right">
 				{{ $t('language') }}: <span class="select" :class="[{ selected: $i18n.locale == 'en' }]" @click="$i18n.locale='en'">EN</span> <span class="select" :class="[{ selected: $i18n.locale == 'ru' }]" @click="$i18n.locale='ru'">RU</span><br />
+				{{ $t('selectAsset') }}: <span class="select" :class="[{ selected: asset == 'waves' }]" @click="asset='waves'">WAVES</span> <span class="select" :class="[{ selected: asset == 'wct' }]" @click="asset='wct'">WCT</span><br />
 				{{ $t('round') }}: {{ round }}<br />
 				{{ $t('balance') }}: {{ wvsBalance }} WAVES + {{ wctBalance }} WCT<br />
 				{{ $t('lastWin') }}:
 				<template v-if="round === 1">{{ $t('firstRound') }}</template>
 				<template v-else>{{ lastWin.cell }}<br />{{ lastWin.address }}</template>
-				<br />
-				<span class="button" @click="checkNetwork">{{ $t('highlight') }}</span>
 			</div>
 			<div id="footer">
 				{{ $t('gameAddress') }}: {{ game }}<br />
-				<!-- {{ $t('forumThread') }}<br /> -->
+				<a href="https://github.com/bodrych/waves-lottery">{{ $t('github') }}</a><br />
 			</div>
 		</div>
 	</div>

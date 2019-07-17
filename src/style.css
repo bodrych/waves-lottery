@@ -48,17 +48,24 @@ div#app {
     position: absolute;
 	gap: 15px;
 	display: grid;
-	grid-template: auto auto auto / 1fr minmax(10vw, 25vw) max-content minmax(10vw, 25vw) 1fr;
+	grid-template: 20px auto auto auto / 1fr minmax(10vw, 25vw) max-content minmax(10vw, 25vw) 1fr;
 	/*justify-items: center;*/
 	justify-items: space-evenly;
 	align-items: center;
 	grid-template-areas:
+		". status status status ."
 		". header header header ."
 		". left main right ."
 		". footer footer footer .";
 }
 span#title {
 	font-size: 1.5em;
+}
+div#status {
+	/*padding: 5px;*/
+	grid-area: status;
+	text-align: center;
+	/*background-color: rgba(255, 255, 255, 0.5);*/
 }
 div#header {
 	grid-area: header;
@@ -103,6 +110,27 @@ span.selected {
 	/*text-decoration: underline;*/
 	color: rgba(0, 0, 0, 1);
 }
+
+
+
+a {
+	cursor: pointer;
+	color: rgba(0, 0, 0, 0.5);
+	text-decoration: none;
+}
+a:hover {
+	color: rgba(0, 0, 0, 1);
+}
+a:active {
+	cursor: auto;
+	/*text-decoration: underline;*/
+	color: rgba(0, 0, 0, 1);
+}
+
+
+
+
+
 
 .bg {
   animation: slide 3s ease-in-out infinite alternate;
